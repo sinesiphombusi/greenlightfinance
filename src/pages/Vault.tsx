@@ -1,37 +1,93 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowDownToLine, ArrowUpFromLine, TrendingUp, Info, ShieldCheck, AlertTriangle } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, TrendingUp, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AppLayout from "@/components/AppLayout";
 import EducationTooltip from "@/components/EducationTooltip";
+import VaultEducationBlocks from "@/components/vault/VaultEducationBlocks";
+import ConfirmStep from "@/components/vault/ConfirmStep";
+import SuccessStep from "@/components/vault/SuccessStep";
 import { mockVaultData } from "@/lib/mock-data";
 import { toast } from "sonner";
+
+type FlowStep = "idle" | "input" | "confirm" | "success";
 
 const Vault = () => {
   const [balance, setBalance] = useState(mockVaultData.balance);
   const [amount, setAmount] = useState("");
   const [mode, setMode] = useState<"deposit" | "withdraw" | null>(null);
+  const [step, setStep] = useState<FlowStep>("idle");
+  const [lastAmount, setLastAmount] = useState(0);
 
-  const handleAction = () => {
-    const val = parseFloat(amount);
-    if (!val || val <= 0) return;
+  const parsedAmount = parseFloat(amount);
+  const isValidAmount = parsedAmount > 0;
 
-    if (mode === "deposit") {
-      setBalance((b) => b + val);
-      toast.success(`Deposited $${val.toFixed(2)} into your vault`);
-    } else {
-      if (val > balance) {
-        toast.error("Not enough in your vault");
-        return;
-      }
-      setBalance((b) => b - val);
-      toast.success(`Withdrew $${val.toFixed(2)} from your vault`);
+  const handleProceedToConfirm = () => {
+    if (!isValidAmount) return;
+    if (mode === "withdraw" && parsedAmount > balance) {
+      toast.error("Not enough in your vault");
+      return;
     }
-    setAmount("");
-    setMode(null);
+    setLastAmount(parsedAmount);
+    setStep("confirm");
   };
 
+  const handleConfirm = () => {
+    if (mode === "deposit") {
+      setBalance((b) => b + lastAmount);
+    } else {
+      setBalance((b) => b - lastAmount);
+    }
+    setStep("success");
+  };
+
+  const resetFlow = () => {
+    setMode(null);
+    setStep("idle");
+    setAmount("");
+    setLastAmount(0);
+  };
+
+  const startMode = (m: "deposit" | "withdraw") => {
+    setMode(m);
+    setStep("input");
+    setAmount("");
+  };
+
+  // Confirm step
+  if (step === "confirm" && mode) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <ConfirmStep
+            mode={mode}
+            amount={lastAmount}
+            onConfirm={handleConfirm}
+            onCancel={() => setStep("input")}
+          />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Success step
+  if (step === "success" && mode) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <SuccessStep
+            mode={mode}
+            amount={lastAmount}
+            newBalance={balance}
+            onBackToVault={resetFlow}
+          />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Default: idle + input
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -73,31 +129,21 @@ const Vault = () => {
         </motion.div>
 
         {/* Action buttons */}
-        {!mode && (
+        {step === "idle" && (
           <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              size="lg"
-              className="gap-2"
-              onClick={() => setMode("deposit")}
-            >
+            <Button variant="outline" size="lg" className="gap-2" onClick={() => startMode("deposit")}>
               <ArrowDownToLine className="w-4 h-4" />
               Deposit
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="gap-2"
-              onClick={() => setMode("withdraw")}
-            >
+            <Button variant="outline" size="lg" className="gap-2" onClick={() => startMode("withdraw")}>
               <ArrowUpFromLine className="w-4 h-4" />
               Withdraw
             </Button>
           </div>
         )}
 
-        {/* Action Panel */}
-        {mode && (
+        {/* Input step */}
+        {step === "input" && mode && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -122,10 +168,7 @@ const Vault = () => {
                 />
               </div>
               <button
-                onClick={() => {
-                  setMode(null);
-                  setAmount("");
-                }}
+                onClick={resetFlow}
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
                 Cancel
@@ -142,11 +185,11 @@ const Vault = () => {
                   className="pl-7 h-11"
                   autoFocus
                   min={0}
-                  onKeyDown={(e) => e.key === "Enter" && handleAction()}
+                  onKeyDown={(e) => e.key === "Enter" && handleProceedToConfirm()}
                 />
               </div>
-              <Button onClick={handleAction} disabled={!amount || parseFloat(amount) <= 0}>
-                Confirm
+              <Button onClick={handleProceedToConfirm} disabled={!isValidAmount}>
+                Continue
               </Button>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -156,58 +199,8 @@ const Vault = () => {
           </motion.div>
         )}
 
-        {/* Education: How your vault works */}
-        <div className="glass-card rounded-xl p-5 space-y-2">
-          <h3 className="font-display font-semibold text-sm text-foreground">How your vault works</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            You deposit money into the vault. Your funds are then put to work to generate steady returns.
-            Your balance grows gradually over time, and you can withdraw whenever you choose — no waiting, no penalties.
-          </p>
-        </div>
-
-        {/* Education: What you stay in control of */}
-        <div className="glass-card rounded-xl p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-primary" />
-            <h3 className="font-display font-semibold text-sm text-foreground">What you stay in control of</h3>
-          </div>
-          <ul className="space-y-1.5 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5">•</span>
-              Withdraw your money at any time
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5">•</span>
-              No lock-ups or penalties
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5">•</span>
-              You always own your funds
-            </li>
-          </ul>
-        </div>
-
-        {/* Education: Risks to know */}
-        <div className="glass-card rounded-xl p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-warning" />
-            <h3 className="font-display font-semibold text-sm text-foreground">Risks to know</h3>
-          </div>
-          <ul className="space-y-1.5 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <span className="text-warning mt-0.5">•</span>
-              Returns can change over time
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-warning mt-0.5">•</span>
-              Smart contracts carry technical risk
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-warning mt-0.5">•</span>
-              This is not insured like a bank account
-            </li>
-          </ul>
-        </div>
+        {/* Education blocks */}
+        <VaultEducationBlocks />
       </div>
     </AppLayout>
   );
