@@ -2,12 +2,13 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Shield, Zap, Eye, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import StashVaultLogo from "@/components/StashVaultLogo";
 
 const features = [
   {
     icon: Shield,
     title: "No wallet needed",
-    description: "Sign in with email. We handle the blockchain stuff so you don't have to.",
+    description: "Sign in with email. We handle the technical details so you don't have to.",
   },
   {
     icon: Zap,
@@ -26,10 +27,11 @@ const Landing = () => {
     <div className="min-h-screen hero-gradient flex flex-col">
       <header className="px-6 py-5 flex items-center justify-between max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-display font-bold">G</span>
+          <StashVaultLogo size="md" />
+          <div className="flex flex-col">
+            <span className="font-display font-semibold text-lg text-foreground leading-tight">StashVault</span>
+            <span className="text-[10px] text-muted-foreground leading-tight">by Greenlight Finance</span>
           </div>
-          <span className="font-display font-semibold text-lg text-foreground">Greenlight Finance</span>
         </div>
         <Link to="/onboarding">
           <Button variant="outline" size="sm">
@@ -47,16 +49,16 @@ const Landing = () => {
         >
           <div className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-1.5 text-sm text-accent-foreground font-medium">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse-soft" />
-            Built on Flow blockchain
+            Built for steady, long-term growth
           </div>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight text-balance">
             Save smarter.
             <br />
-            <span className="text-primary">No crypto needed.</span>
+            <span className="text-primary">Grow steadily.</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
-            A simple savings vault that earns yield on your deposits.
-            No wallets, no fees, no jargon. Just your money, growing.
+            A simple savings vault that grows your money over time.
+            No complicated setup, no fees, no jargon. Just patience rewarded.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Link to="/onboarding">
@@ -92,7 +94,7 @@ const Landing = () => {
       <footer className="px-6 py-6 border-t border-border">
         <div className="max-w-5xl mx-auto flex items-center justify-between text-sm text-muted-foreground">
           <span>© 2026 Greenlight Finance</span>
-          <span>Testnet · Flow Blockchain</span>
+          <span>Built for patience, not speculation.</span>
         </div>
       </footer>
     </div>

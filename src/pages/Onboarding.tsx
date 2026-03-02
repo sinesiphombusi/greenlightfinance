@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, ArrowRight, Loader2, CheckCircle2, Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import StashVaultLogo from "@/components/StashVaultLogo";
 
 const steps = [
   { id: "welcome", title: "Welcome aboard" },
@@ -21,7 +22,6 @@ const Onboarding = () => {
     if (!email) return;
     setCurrentStep(2);
     setIsLoading(true);
-    // Simulate account creation
     await new Promise((r) => setTimeout(r, 2500));
     setIsLoading(false);
     navigate("/vault");
@@ -52,15 +52,13 @@ const Onboarding = () => {
               className="space-y-6"
             >
               <div className="space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-6">
-                  <span className="text-primary-foreground font-display font-bold text-xl">G</span>
-                </div>
+                <StashVaultLogo size="lg" className="mb-6" />
                 <h1 className="font-display text-2xl font-bold text-foreground">
-                  Welcome to Greenlight
+                  Welcome to StashVault
                 </h1>
                 <p className="text-muted-foreground leading-relaxed">
                   In the next 30 seconds, we'll create a secure account for you.
-                  No wallet downloads. No seed phrases. Just your email.
+                  No downloads, no complicated setup. Just your email.
                 </p>
               </div>
               <div className="space-y-3 pt-2">
@@ -106,7 +104,7 @@ const Onboarding = () => {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground text-center">
-                This creates a secure Flow blockchain account linked to your email.
+                This creates a secure account linked to your email.
                 You can always access it later.
               </p>
             </motion.div>
@@ -135,7 +133,7 @@ const Onboarding = () => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
                   >
-                    ✓ Flow account created
+                    ✓ Account created
                   </motion.p>
                   <motion.p
                     initial={{ opacity: 0 }}
@@ -149,7 +147,7 @@ const Onboarding = () => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.4 }}
                   >
-                    ✓ Gas fees sponsored
+                    ✓ All fees covered for you
                   </motion.p>
                 </div>
               </div>
