@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowDownToLine, ArrowUpFromLine, TrendingUp, Info } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, TrendingUp, Info, ShieldCheck, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AppLayout from "@/components/AppLayout";
@@ -37,7 +37,7 @@ const Vault = () => {
       <div className="space-y-6">
         <div className="space-y-1">
           <h1 className="font-display text-2xl font-bold text-foreground">Savings Vault</h1>
-          <p className="text-muted-foreground text-sm">Your money, earning yield every day.</p>
+          <p className="text-muted-foreground text-sm">Your money, growing steadily over time.</p>
         </div>
 
         {/* Balance Card */}
@@ -51,8 +51,8 @@ const Vault = () => {
             <EducationTooltip
               whatItDoes="Shows the total value of your deposits plus any earnings."
               whyItMatters="This is how much you'd receive if you withdrew everything right now."
-              whatCouldGoWrong="Yield rates can change, but your principal is always yours."
-              whatYouControl="You can deposit or withdraw at any time, no lock-ups."
+              whatCouldGoWrong="Returns can vary over time, but your deposits are always yours."
+              whatYouControl="You can deposit or withdraw at any time — no lock-ups."
             />
           </div>
           <div className="flex items-baseline gap-2">
@@ -109,15 +109,15 @@ const Vault = () => {
                 <EducationTooltip
                   whatItDoes={
                     mode === "deposit"
-                      ? "Moves your funds into the savings vault where they start earning yield."
+                      ? "Moves your funds into the savings vault where they begin growing."
                       : "Moves funds from the vault back to your available balance."
                   }
                   whyItMatters={
                     mode === "deposit"
-                      ? "Your deposit starts earning yield immediately — no waiting period."
+                      ? "Your deposit starts earning right away — no waiting period."
                       : "You always have access to your money. No penalties or lock-ups."
                   }
-                  whatCouldGoWrong="Nothing unexpected. The transaction is instant and gas-free."
+                  whatCouldGoWrong="Nothing unexpected. The transaction is instant and fee-free."
                   whatYouControl="The exact amount. You choose how much to move."
                 />
               </div>
@@ -151,18 +151,62 @@ const Vault = () => {
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Info className="w-3 h-3" />
-              <span>No fees. Transaction is instant and gas-free.</span>
+              <span>No fees. Transaction is instant.</span>
             </div>
           </motion.div>
         )}
 
-        {/* Info card */}
+        {/* Education: How your vault works */}
         <div className="glass-card rounded-xl p-5 space-y-2">
           <h3 className="font-display font-semibold text-sm text-foreground">How your vault works</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Your savings vault deposits stable assets into a low-risk yield strategy on the Flow blockchain.
-            Your funds earn interest daily, and you can withdraw anytime with no penalties or hidden fees.
+            You deposit money into the vault. Your funds are then put to work to generate steady returns.
+            Your balance grows gradually over time, and you can withdraw whenever you choose — no waiting, no penalties.
           </p>
+        </div>
+
+        {/* Education: What you stay in control of */}
+        <div className="glass-card rounded-xl p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-primary" />
+            <h3 className="font-display font-semibold text-sm text-foreground">What you stay in control of</h3>
+          </div>
+          <ul className="space-y-1.5 text-sm text-muted-foreground">
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-0.5">•</span>
+              Withdraw your money at any time
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-0.5">•</span>
+              No lock-ups or penalties
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-0.5">•</span>
+              You always own your funds
+            </li>
+          </ul>
+        </div>
+
+        {/* Education: Risks to know */}
+        <div className="glass-card rounded-xl p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-warning" />
+            <h3 className="font-display font-semibold text-sm text-foreground">Risks to know</h3>
+          </div>
+          <ul className="space-y-1.5 text-sm text-muted-foreground">
+            <li className="flex items-start gap-2">
+              <span className="text-warning mt-0.5">•</span>
+              Returns can change over time
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-warning mt-0.5">•</span>
+              Smart contracts carry technical risk
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-warning mt-0.5">•</span>
+              This is not insured like a bank account
+            </li>
+          </ul>
         </div>
       </div>
     </AppLayout>

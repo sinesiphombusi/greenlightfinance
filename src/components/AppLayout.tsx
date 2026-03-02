@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Wallet, Zap, Clock, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import StashVaultLogo from "@/components/StashVaultLogo";
 
 const navItems = [
   { to: "/vault", label: "Vault", icon: Wallet },
@@ -16,10 +17,11 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
           <NavLink to="/vault" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display font-bold text-sm">G</span>
+            <StashVaultLogo size="sm" />
+            <div className="flex flex-col">
+              <span className="font-display font-semibold text-foreground leading-tight">StashVault</span>
+              <span className="text-[9px] text-muted-foreground leading-tight">by Greenlight Finance</span>
             </div>
-            <span className="font-display font-semibold text-foreground">Greenlight</span>
           </NavLink>
           <NavLink
             to="/"
