@@ -1,15 +1,17 @@
 import { motion } from "framer-motion";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FLOW_EVM_TESTNET } from "@/lib/config";
 
 interface SuccessStepProps {
   mode: "deposit" | "withdraw";
   amount: number;
   newBalance: number;
   onBackToVault: () => void;
+  txHash?: string | null;
 }
 
-const SuccessStep = ({ mode, amount, newBalance, onBackToVault }: SuccessStepProps) => {
+const SuccessStep = ({ mode, amount, newBalance, onBackToVault, txHash }: SuccessStepProps) => {
   const isDeposit = mode === "deposit";
 
   return (
@@ -51,6 +53,20 @@ const SuccessStep = ({ mode, amount, newBalance, onBackToVault }: SuccessStepPro
             ${newBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </div>
         </div>
+        {txHash && (
+          <div className="border-t border-border/40 pt-3 mt-3">
+            <div className="text-sm text-vault-foreground/70">Transaction</div>
+            <a
+              href={`${FLOW_EVM_TESTNET.blockExplorerUrl}/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline break-all"
+            >
+              {txHash.slice(0, 10)}…{txHash.slice(-8)}
+              <ExternalLink className="w-3 h-3 shrink-0" />
+            </a>
+          </div>
+        )}
       </div>
 
       <Button className="w-full" size="lg" onClick={onBackToVault}>

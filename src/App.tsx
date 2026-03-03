@@ -9,24 +9,27 @@ import Vault from "./pages/Vault";
 import Autopilot from "./pages/Autopilot";
 import ActivityPage from "./pages/ActivityPage";
 import NotFound from "./pages/NotFound";
+import { WalletProvider } from "./hooks/use-wallet";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/vault" element={<Vault />} />
-          <Route path="/autopilot" element={<Autopilot />} />
-          <Route path="/activity" element={<ActivityPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <WalletProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/vault" element={<Vault />} />
+            <Route path="/autopilot" element={<Autopilot />} />
+            <Route path="/activity" element={<ActivityPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </WalletProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

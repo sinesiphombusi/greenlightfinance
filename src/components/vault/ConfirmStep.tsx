@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VaultEducationBlocks from "./VaultEducationBlocks";
 
@@ -8,9 +8,10 @@ interface ConfirmStepProps {
   amount: number;
   onConfirm: () => void;
   onCancel: () => void;
+  isProcessing?: boolean;
 }
 
-const ConfirmStep = ({ mode, amount, onConfirm, onCancel }: ConfirmStepProps) => {
+const ConfirmStep = ({ mode, amount, onConfirm, onCancel, isProcessing = false }: ConfirmStepProps) => {
   const isDeposit = mode === "deposit";
 
   return (
@@ -21,7 +22,8 @@ const ConfirmStep = ({ mode, amount, onConfirm, onCancel }: ConfirmStepProps) =>
     >
       <button
         onClick={onCancel}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        disabled={isProcessing}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
       >
         <ArrowLeft className="w-4 h-4" />
         Go back
@@ -52,11 +54,18 @@ const ConfirmStep = ({ mode, amount, onConfirm, onCancel }: ConfirmStepProps) =>
       />
 
       <div className="flex gap-3 pt-2">
-        <Button variant="outline" className="flex-1" onClick={onCancel}>
+        <Button variant="outline" className="flex-1" onClick={onCancel} disabled={isProcessing}>
           Cancel
         </Button>
-        <Button className="flex-1" onClick={onConfirm}>
-          Confirm {isDeposit ? "deposit" : "withdrawal"}
+        <Button className="flex-1" onClick={onConfirm} disabled={isProcessing}>
+          {isProcessing ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Processing…
+            </span>
+          ) : (
+            `Confirm ${isDeposit ? "deposit" : "withdrawal"}`
+          )}
         </Button>
       </div>
     </motion.div>
