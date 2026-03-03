@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowDownToLine, ArrowUpFromLine, TrendingUp, Info } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, TrendingUp, Info, Wallet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AppLayout from "@/components/AppLayout";
@@ -9,16 +9,32 @@ import VaultEducationBlocks from "@/components/vault/VaultEducationBlocks";
 import ConfirmStep from "@/components/vault/ConfirmStep";
 import SuccessStep from "@/components/vault/SuccessStep";
 import { mockVaultData } from "@/lib/mock-data";
+import { useWallet } from "@/hooks/use-wallet";
+import { getVaultBalance, deposit as contractDeposit, withdraw as contractWithdraw } from "@/lib/vault";
 import { toast } from "sonner";
 
 type FlowStep = "idle" | "input" | "confirm" | "success";
 
 const Vault = () => {
+  const { address, isConnecting, isAvailable, connect } = useWallet();
   const [balance, setBalance] = useState(mockVaultData.balance);
   const [amount, setAmount] = useState("");
   const [mode, setMode] = useState<"deposit" | "withdraw" | null>(null);
   const [step, setStep] = useState<FlowStep>("idle");
   const [lastAmount, setLastAmount] = useState(0);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Fetch on-chain balance when wallet is connected
+  useEffect(() => {
+    if (!address) return;
+    getVaultBalance(address)
+      .then((bal) => setBalance(bal))
+      .catch((err) => {
+        console.warn("Failed to fetch on-chain balance, using mock:", err);
+        // Keep mock balance as fallback
+      });
+  }, [address]);
 
   const parsedAmount = parseFloat(amount);
   const isValidAmount = parsedAmount > 0;
@@ -33,13 +49,39 @@ const Vault = () => {
     setStep("confirm");
   };
 
-  const handleConfirm = () => {
-    if (mode === "deposit") {
-      setBalance((b) => b + lastAmount);
-    } else {
-      setBalance((b) => b - lastAmount);
+  const handleConfirm = async () => {
+    setIsProcessing(true);
+    setTxHash(null);
+
+    try {
+      if (address) {
+        // Connected: call real contract
+        let hash: string;
+        if (mode === "deposit") {
+          hash = await contractDeposit(lastAmount);
+        } else {
+          hash = await contractWithdraw(lastAmount);
+        }
+        setTxHash(hash);
+
+        // Refresh balance from chain
+        const newBal = await getVaultBalance(address);
+        setBalance(newBal);
+      } else {
+        // Not connected: mock update
+        if (mode === "deposit") {
+          setBalance((b) => b + lastAmount);
+        } else {
+          setBalance((b) => b - lastAmount);
+        }
+      }
+      setStep("success");
+    } catch (err: any) {
+      console.error("Transaction failed:", err);
+      toast.error(err?.message || "Transaction failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
     }
-    setStep("success");
   };
 
   const resetFlow = () => {
@@ -47,12 +89,22 @@ const Vault = () => {
     setStep("idle");
     setAmount("");
     setLastAmount(0);
+    setTxHash(null);
   };
 
   const startMode = (m: "deposit" | "withdraw") => {
     setMode(m);
     setStep("input");
     setAmount("");
+  };
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+      toast.success("Wallet connected!");
+    } catch (err: any) {
+      toast.error(err?.message || "Could not connect wallet");
+    }
   };
 
   // Confirm step
@@ -65,6 +117,7 @@ const Vault = () => {
             amount={lastAmount}
             onConfirm={handleConfirm}
             onCancel={() => setStep("input")}
+            isProcessing={isProcessing}
           />
         </div>
       </AppLayout>
@@ -81,6 +134,7 @@ const Vault = () => {
             amount={lastAmount}
             newBalance={balance}
             onBackToVault={resetFlow}
+            txHash={txHash}
           />
         </div>
       </AppLayout>
@@ -95,6 +149,32 @@ const Vault = () => {
           <h1 className="font-display text-2xl font-bold text-foreground">Savings Vault</h1>
           <p className="text-muted-foreground text-sm">Your money, growing steadily over time.</p>
         </div>
+
+        {/* Wallet connection banner */}
+        {!address && (
+          <div className="glass-card rounded-xl p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <Wallet className="w-5 h-5 text-muted-foreground shrink-0" />
+              <p className="text-sm text-muted-foreground">
+                {isAvailable
+                  ? "Connect your wallet to interact with the vault on-chain."
+                  : "Using demo mode. Install a wallet to go on-chain."}
+              </p>
+            </div>
+            {isAvailable && (
+              <Button size="sm" variant="outline" onClick={handleConnect} disabled={isConnecting}>
+                {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {address && (
+          <div className="glass-card rounded-xl px-4 py-2.5 flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="w-2 h-2 rounded-full bg-success shrink-0" />
+            <span className="truncate">Connected: {address}</span>
+          </div>
+        )}
 
         {/* Balance Card */}
         <motion.div
