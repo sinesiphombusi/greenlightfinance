@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Shield, Zap, Eye, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StashVaultLogo from "@/components/StashVaultLogo";
+import JourneySteps from "@/components/JourneySteps";
 
 const features = [
   {
@@ -88,6 +89,23 @@ const Landing = () => {
               <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      <section className="px-6 pb-20 pt-4">
+        <div className="max-w-5xl mx-auto space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="text-center space-y-2"
+          >
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">Your savings journey</h2>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              From sign-up to steady growth — we guide you every step of the way.
+            </p>
+          </motion.div>
+          <JourneySteps />
         </div>
       </section>
 

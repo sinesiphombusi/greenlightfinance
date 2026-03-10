@@ -12,6 +12,7 @@ import { mockVaultData } from "@/lib/mock-data";
 import { useWallet } from "@/hooks/use-wallet";
 import { getVaultBalance, deposit as contractDeposit, withdraw as contractWithdraw } from "@/lib/vault";
 import { toast } from "sonner";
+import JourneySteps from "@/components/JourneySteps";
 
 type FlowStep = "idle" | "input" | "confirm" | "success";
 
@@ -145,6 +146,8 @@ const Vault = () => {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <JourneySteps compact currentStep={3} />
+
         <div className="space-y-1">
           <h1 className="font-display text-2xl font-bold text-foreground">Savings Vault</h1>
           <p className="text-muted-foreground text-sm">Your money, growing steadily over time.</p>
