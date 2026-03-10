@@ -12,6 +12,7 @@ import { mockVaultData } from "@/lib/mock-data";
 import { useWallet } from "@/hooks/use-wallet";
 import { getVaultBalance, deposit as contractDeposit, withdraw as contractWithdraw } from "@/lib/vault";
 import { toast } from "sonner";
+import JourneySteps from "@/components/JourneySteps";
 
 type FlowStep = "idle" | "input" | "confirm" | "success";
 

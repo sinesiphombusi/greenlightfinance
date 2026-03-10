@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Shield, Zap, Eye, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StashVaultLogo from "@/components/StashVaultLogo";
+import JourneySteps from "@/components/JourneySteps";
 
 const features = [
   {
