@@ -2,6 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Wallet, Zap, Clock, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import StashVaultLogo from "@/components/StashVaultLogo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navItems = [
   { to: "/vault", label: "Vault", icon: Wallet },
