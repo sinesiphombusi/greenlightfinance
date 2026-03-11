@@ -35,11 +35,14 @@ const Landing = () => {
             <span className="text-[10px] text-muted-foreground leading-tight">by Greenlight Finance</span>
           </div>
         </div>
-        <Link to="/onboarding">
-          <Button variant="outline" size="sm">
-            Sign in
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <ThemeToggle variant="outline" />
+          <Link to="/onboarding">
+            <Button variant="outline" size="sm">
+              Sign in
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-2xl mx-auto -mt-16">
