@@ -2,6 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Wallet, Zap, Clock, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import StashVaultLogo from "@/components/StashVaultLogo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navItems = [
   { to: "/vault", label: "Vault", icon: Wallet },
@@ -23,13 +24,16 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               <span className="text-[9px] text-muted-foreground leading-tight">by Greenlight Finance</span>
             </div>
           </NavLink>
-          <NavLink
-            to="/"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Sign out</span>
-          </NavLink>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <NavLink
+              to="/"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 px-2 py-1.5"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign out</span>
+            </NavLink>
+          </div>
         </div>
       </header>
 
