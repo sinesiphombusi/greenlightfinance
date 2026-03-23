@@ -38,7 +38,7 @@ const Landing = () => {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
       />
-      <div className="absolute inset-0 bg-background/80 dark:bg-background/85" />
+      
       {/* Header */}
       <header className="relative z-10 px-5 py-4 flex items-center justify-between max-w-lg mx-auto w-full">
         <div className="flex items-center gap-2.5">
