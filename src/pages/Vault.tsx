@@ -26,14 +26,12 @@ const Vault = () => {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Fetch on-chain balance when wallet is connected
   useEffect(() => {
     if (!address) return;
     getVaultBalance(address)
       .then((bal) => setBalance(bal))
       .catch((err) => {
         console.warn("Failed to fetch on-chain balance, using mock:", err);
-        // Keep mock balance as fallback
       });
   }, [address]);
 
@@ -53,10 +51,8 @@ const Vault = () => {
   const handleConfirm = async () => {
     setIsProcessing(true);
     setTxHash(null);
-
     try {
       if (address) {
-        // Connected: call real contract
         let hash: string;
         if (mode === "deposit") {
           hash = await contractDeposit(lastAmount);
@@ -64,12 +60,9 @@ const Vault = () => {
           hash = await contractWithdraw(lastAmount);
         }
         setTxHash(hash);
-
-        // Refresh balance from chain
         const newBal = await getVaultBalance(address);
         setBalance(newBal);
       } else {
-        // Not connected: mock update
         if (mode === "deposit") {
           setBalance((b) => b + lastAmount);
         } else {
@@ -108,7 +101,6 @@ const Vault = () => {
     }
   };
 
-  // Confirm step
   if (step === "confirm" && mode) {
     return (
       <AppLayout>
@@ -125,7 +117,6 @@ const Vault = () => {
     );
   }
 
-  // Success step
   if (step === "success" && mode) {
     return (
       <AppLayout>
@@ -142,51 +133,23 @@ const Vault = () => {
     );
   }
 
-  // Default: idle + input
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <JourneySteps compact currentStep={3} />
-
+      <div className="space-y-5">
+        {/* Greeting */}
         <div className="space-y-1">
-          <h1 className="font-display text-2xl font-bold text-foreground">Savings Vault</h1>
-          <p className="text-muted-foreground text-sm">Your money, growing steadily over time.</p>
+          <h1 className="font-display text-xl font-bold text-foreground">Welcome back 👋</h1>
+          <p className="text-muted-foreground text-sm">Your money is growing steadily.</p>
         </div>
-
-        {/* Wallet connection banner */}
-        {!address && (
-          <div className="glass-card rounded-xl p-4 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <Wallet className="w-5 h-5 text-muted-foreground shrink-0" />
-              <p className="text-sm text-muted-foreground">
-                {isAvailable
-                  ? "Connect your wallet to interact with the vault on-chain."
-                  : "Using demo mode. Install a wallet to go on-chain."}
-              </p>
-            </div>
-            {isAvailable && (
-              <Button size="sm" variant="outline" onClick={handleConnect} disabled={isConnecting}>
-                {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
-              </Button>
-            )}
-          </div>
-        )}
-
-        {address && (
-          <div className="glass-card rounded-xl px-4 py-2.5 flex items-center gap-2 text-xs text-muted-foreground">
-            <div className="w-2 h-2 rounded-full bg-success shrink-0" />
-            <span className="truncate">Connected: {address}</span>
-          </div>
-        )}
 
         {/* Balance Card */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="vault-gradient rounded-2xl p-6 sm:p-8 glow-ring space-y-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card p-6 glow-ring space-y-4"
         >
-          <div className="flex items-center gap-2 text-sm text-vault-foreground/70">
-            <span>Total balance</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Total Balance</span>
             <EducationTooltip
               whatItDoes="Shows the total value of your deposits plus any earnings."
               whyItMatters="This is how much you'd receive if you withdrew everything right now."
@@ -194,34 +157,69 @@ const Vault = () => {
               whatYouControl="You can deposit or withdraw at any time — no lock-ups."
             />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="font-display text-4xl sm:text-5xl font-bold text-foreground">
+          <div>
+            <span className="font-display text-4xl font-bold text-foreground">
               ${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
-            <span className="text-sm font-medium text-muted-foreground">{mockVaultData.currency}</span>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1.5 text-success">
-              <TrendingUp className="w-4 h-4" />
-              <span className="font-medium">{mockVaultData.apy}% APY</span>
-            </div>
-            <span className="text-vault-foreground/60">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-success bg-success/10 px-2.5 py-1 rounded-full">
+              <TrendingUp className="w-3.5 h-3.5" />
+              +{mockVaultData.apy}%
+            </span>
+            <span className="text-sm text-muted-foreground">
               +${mockVaultData.earned.toFixed(2)} earned
             </span>
           </div>
         </motion.div>
 
-        {/* Action buttons */}
+        {/* Action buttons — circular, like reference */}
         {step === "idle" && (
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="lg" className="gap-2" onClick={() => startMode("deposit")}>
-              <ArrowDownToLine className="w-4 h-4" />
-              Deposit
-            </Button>
-            <Button variant="outline" size="lg" className="gap-2" onClick={() => startMode("withdraw")}>
-              <ArrowUpFromLine className="w-4 h-4" />
-              Withdraw
-            </Button>
+          <div className="flex justify-center gap-6 py-2">
+            <button
+              onClick={() => startMode("deposit")}
+              className="flex flex-col items-center gap-2"
+            >
+              <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-md">
+                <ArrowDownToLine className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="text-xs font-medium text-foreground">Deposit</span>
+            </button>
+            <button
+              onClick={() => startMode("withdraw")}
+              className="flex flex-col items-center gap-2"
+            >
+              <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-md">
+                <ArrowUpFromLine className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="text-xs font-medium text-foreground">Withdraw</span>
+            </button>
+          </div>
+        )}
+
+        {/* Wallet connection */}
+        {!address && (
+          <div className="glass-card p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <Wallet className="w-5 h-5 text-muted-foreground shrink-0" />
+              <p className="text-sm text-muted-foreground">
+                {isAvailable
+                  ? "Connect your wallet for on-chain access."
+                  : "Demo mode active."}
+              </p>
+            </div>
+            {isAvailable && (
+              <Button size="sm" variant="outline" onClick={handleConnect} disabled={isConnecting} className="rounded-full">
+                {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {address && (
+          <div className="glass-card px-4 py-2.5 flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="w-2 h-2 rounded-full bg-success shrink-0" />
+            <span className="truncate">Connected: {address}</span>
           </div>
         )}
 
@@ -230,7 +228,7 @@ const Vault = () => {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="glass-card rounded-xl p-5 space-y-4"
+            className="glass-card p-5 space-y-4"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -259,19 +257,19 @@ const Vault = () => {
             </div>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <span className="absolute left-3 top-2.5 text-muted-foreground font-medium">$</span>
+                <span className="absolute left-3.5 top-3 text-muted-foreground font-medium">$</span>
                 <Input
                   type="number"
                   placeholder="0.00"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="pl-7 h-11"
+                  className="pl-8 h-12 rounded-xl text-base"
                   autoFocus
                   min={0}
                   onKeyDown={(e) => e.key === "Enter" && handleProceedToConfirm()}
                 />
               </div>
-              <Button onClick={handleProceedToConfirm} disabled={!isValidAmount}>
+              <Button onClick={handleProceedToConfirm} disabled={!isValidAmount} className="rounded-xl h-12">
                 Continue
               </Button>
             </div>
@@ -281,6 +279,9 @@ const Vault = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Journey indicator */}
+        <JourneySteps compact currentStep={3} />
 
         {/* Education blocks */}
         <VaultEducationBlocks />

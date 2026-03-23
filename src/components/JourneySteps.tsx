@@ -44,12 +44,12 @@ const JourneySteps = ({ compact = false, currentStep }: JourneyStepsProps) => {
   if (compact && currentStep !== undefined) {
     const step = steps[currentStep];
     return (
-      <div className="glass-card rounded-xl px-4 py-2.5 flex items-center gap-3">
+      <div className="glass-card px-4 py-3 flex items-center gap-3">
         <div className="flex items-center gap-1.5">
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`w-1.5 h-1.5 rounded-full ${
+              className={`w-2 h-2 rounded-full transition-colors ${
                 i === currentStep
                   ? "bg-primary"
                   : i < currentStep
@@ -67,48 +67,42 @@ const JourneySteps = ({ compact = false, currentStep }: JourneyStepsProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-3">
+    <div className="space-y-3">
       {steps.map((step, i) => (
         <motion.div
           key={step.label}
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 + i * 0.08, duration: 0.5 }}
-          className="glass-card rounded-xl p-5 sm:p-4 space-y-3 relative"
+          transition={{ delay: 0.1 + i * 0.06, duration: 0.4 }}
+          className="glass-card p-4 flex items-start gap-4"
         >
-          {/* Connector line (desktop only) */}
-          {i < steps.length - 1 && (
-            <div className="hidden sm:block absolute top-8 -right-3 w-3 h-px bg-border" />
-          )}
-
-          <div className="flex items-start justify-between gap-2">
-            <div
-              className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                step.status === "active"
-                  ? "bg-primary/15 text-primary"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              <step.icon className="w-4 h-4" />
-            </div>
-            {step.status === "active" ? (
-              <Badge variant="secondary" className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary border-0">
-                <Check className="w-3 h-3 mr-0.5" />
-                Live
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="text-[10px] px-2 py-0.5 border-0">
-                Soon
-              </Badge>
-            )}
+          <div
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              step.status === "active"
+                ? "bg-primary/15 text-primary"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            <step.icon className="w-5 h-5" />
           </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground">Step {i + 1}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <span className="text-[10px] text-muted-foreground font-medium">Step {i + 1}</span>
+                <h4 className="font-display font-semibold text-foreground text-sm">{step.label}</h4>
+              </div>
+              {step.status === "active" ? (
+                <Badge variant="secondary" className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary border-0 shrink-0">
+                  <Check className="w-3 h-3 mr-0.5" />
+                  Live
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-[10px] px-2 py-0.5 border-0 shrink-0">
+                  Soon
+                </Badge>
+              )}
             </div>
-            <h4 className="font-display font-semibold text-foreground text-sm">{step.label}</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">{step.description}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{step.description}</p>
           </div>
         </motion.div>
       ))}
