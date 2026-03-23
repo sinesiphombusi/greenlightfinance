@@ -59,7 +59,7 @@ const Landing = () => {
       </header>
 
       {/* Hero — mobile-first, centered */}
-      <main className="flex-1 flex flex-col items-center justify-center px-5 text-center max-w-lg mx-auto w-full py-12">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 text-center max-w-lg mx-auto w-full py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
