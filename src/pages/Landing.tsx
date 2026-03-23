@@ -146,7 +146,7 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="px-5 py-5 border-t border-border/60">
+      <footer className="relative z-10 px-5 py-5 border-t border-border/60">
         <div className="max-w-lg mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>© 2026 Greenlight Finance</span>
           <span>Built for patience, not speculation.</span>
