@@ -105,7 +105,7 @@ const Landing = () => {
       </main>
 
       {/* Features */}
-      <section className="px-5 pb-12">
+      <section className="relative z-10 px-5 pb-12">
         <div className="max-w-lg mx-auto space-y-3">
           {features.map((feature, i) => (
             <motion.div
