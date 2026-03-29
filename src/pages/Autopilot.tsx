@@ -1,21 +1,46 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Zap, Play, Calendar, DollarSign } from "lucide-react";
+import { Zap, Play, Calendar, DollarSign, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import AppLayout from "@/components/AppLayout";
 import EducationTooltip from "@/components/EducationTooltip";
+import { useWallet } from "@/hooks/use-wallet";
+import { deposit } from "@/lib/vault";
 import { toast } from "sonner";
 
 const Autopilot = () => {
+  const { isConnected, connect } = useWallet();
   const [enabled, setEnabled] = useState(false);
   const [weeklyAmount, setWeeklyAmount] = useState("50");
+  const [isRunning, setIsRunning] = useState(false);
 
-  const runNow = () => {
+  const runNow = async () => {
     const val = parseFloat(weeklyAmount);
     if (!val || val <= 0) return;
-    toast.success(`Autopilot ran! $${val.toFixed(2)} deposited into your vault.`);
+
+    if (!isConnected) {
+      try {
+        await connect();
+      } catch {
+        toast.error("Please connect your wallet first.");
+        return;
+      }
+    }
+
+    setIsRunning(true);
+    try {
+      const txId = await deposit(val);
+      toast.success(`Autopilot deposited ${val} FLOW on-chain!`, {
+        description: `TX: ${txId.slice(0, 12)}…`,
+      });
+    } catch (err: any) {
+      console.error("Autopilot deposit failed:", err);
+      toast.error(err?.message || "Deposit failed. Please try again.");
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   return (
@@ -47,7 +72,7 @@ const Autopilot = () => {
                   <EducationTooltip
                     whatItDoes="Automatically deposits a set amount into your vault every week."
                     whyItMatters="Consistent saving builds wealth over time — you don't have to remember."
-                    whatCouldGoWrong="If your funding source is empty, the deposit won't go through. You'll be notified."
+                    whatCouldGoWrong="If your wallet doesn't have enough FLOW, the deposit won't go through."
                     whatYouControl="The amount, the schedule, and you can turn it off anytime."
                   />
                 </div>
@@ -71,28 +96,37 @@ const Autopilot = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground flex items-center gap-2">
                   <DollarSign className="w-3.5 h-3.5 text-muted-foreground" />
-                  Weekly amount
+                  Weekly amount (FLOW)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-muted-foreground font-medium">$</span>
                   <Input
                     type="number"
                     value={weeklyAmount}
                     onChange={(e) => setWeeklyAmount(e.target.value)}
-                    className="pl-7 h-11"
-                    min={1}
+                    className="h-11"
+                    min={0.01}
+                    step={0.1}
                   />
                 </div>
               </div>
 
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="w-4 h-4" />
-                <span>Next run: Monday, March 2, 2026</span>
+                <span>Next run: Monday, March 30, 2026</span>
               </div>
 
-              <Button onClick={runNow} variant="outline" className="w-full gap-2">
-                <Play className="w-4 h-4" />
-                Run autopilot now (demo)
+              <Button onClick={runNow} variant="outline" className="w-full gap-2" disabled={isRunning}>
+                {isRunning ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Sending transaction…
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4" />
+                    Run autopilot now
+                  </>
+                )}
               </Button>
             </motion.div>
           )}
@@ -102,9 +136,9 @@ const Autopilot = () => {
         <div className="glass-card rounded-xl p-5 space-y-2">
           <h3 className="font-display font-semibold text-sm text-foreground">How autopilot works</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            When enabled, autopilot automatically moves your chosen amount into the savings vault
-            every Monday morning. All transactions are gas-free and happen in the background.
-            You'll see each run logged in your Activity page.
+            When enabled, autopilot sends your chosen amount of FLOW into the savings vault
+            as an on-chain transaction every Monday morning. Each run is logged in your Activity page
+            and can be verified on FlowScan.
           </p>
         </div>
       </div>

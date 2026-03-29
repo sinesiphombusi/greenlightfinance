@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FLOW_EVM_TESTNET } from "@/lib/config";
+const FLOW_TESTNET_EXPLORER = "https://testnet.flowdiver.io";
 
 interface SuccessStepProps {
   mode: "deposit" | "withdraw";
@@ -57,7 +57,7 @@ const SuccessStep = ({ mode, amount, newBalance, onBackToVault, txHash }: Succes
           <div className="border-t border-border/40 pt-3 mt-3">
             <div className="text-sm text-vault-foreground/70">Transaction</div>
             <a
-              href={`${FLOW_EVM_TESTNET.blockExplorerUrl}/tx/${txHash}`}
+              href={`${FLOW_TESTNET_EXPLORER}/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline break-all"
