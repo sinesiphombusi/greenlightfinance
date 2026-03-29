@@ -23,6 +23,8 @@ const Autopilot = () => {
     if (!isConnected) {
       try {
         await connect();
+        // Wait briefly for FCL auth state to propagate
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch {
         toast.error("Please connect your wallet first.");
         return;
