@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FLOW_EVM_TESTNET } from "@/lib/config";
+const FLOW_TESTNET_EXPLORER = "https://testnet.flowdiver.io";
 
 interface SuccessStepProps {
   mode: "deposit" | "withdraw";
