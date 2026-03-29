@@ -17,7 +17,7 @@ import JourneySteps from "@/components/JourneySteps";
 type FlowStep = "idle" | "input" | "confirm" | "success";
 
 const Vault = () => {
-  const { address, isConnecting, isAvailable, connect } = useWallet();
+  const { address, isConnecting, isConnected, connect } = useWallet();
   const [balance, setBalance] = useState(mockVaultData.balance);
   const [amount, setAmount] = useState("");
   const [mode, setMode] = useState<"deposit" | "withdraw" | null>(null);
@@ -198,21 +198,17 @@ const Vault = () => {
         )}
 
         {/* Wallet connection */}
-        {!address && (
+        {!isConnected && (
           <div className="glass-card p-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <Wallet className="w-5 h-5 text-muted-foreground shrink-0" />
               <p className="text-sm text-muted-foreground">
-                {isAvailable
-                  ? "Connect your wallet for on-chain access."
-                  : "Demo mode active."}
+                Connect your wallet for on-chain access.
               </p>
             </div>
-            {isAvailable && (
-              <Button size="sm" variant="outline" onClick={handleConnect} disabled={isConnecting} className="rounded-full">
-                {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
-              </Button>
-            )}
+            <Button size="sm" variant="outline" onClick={handleConnect} disabled={isConnecting} className="rounded-full">
+              {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
+            </Button>
           </div>
         )}
 
