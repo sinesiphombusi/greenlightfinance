@@ -35,8 +35,8 @@ const SuccessStep = ({ mode, amount, newBalance, onBackToVault, txHash }: Succes
         </h2>
         <p className="text-sm text-muted-foreground">
           {isDeposit
-            ? "Your money is now stashed and growing."
-            : "You can deposit again anytime."}
+            ? "Your FLOW is now stashed on-chain."
+            : "Your FLOW has been unstashed."}
         </p>
       </div>
 
@@ -45,12 +45,12 @@ const SuccessStep = ({ mode, amount, newBalance, onBackToVault, txHash }: Succes
           {isDeposit ? "Amount deposited" : "Amount withdrawn"}
         </div>
         <div className="font-display text-2xl font-bold text-foreground">
-          ${amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          {amount.toLocaleString("en-US", { minimumFractionDigits: 2 })} FLOW
         </div>
         <div className="border-t border-border/40 pt-3 mt-3">
-          <div className="text-sm text-vault-foreground/70">Updated balance</div>
+          <div className="text-sm text-vault-foreground/70">Updated vault balance</div>
           <div className="font-display text-2xl font-bold text-foreground">
-            ${newBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            {newBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })} FLOW
           </div>
         </div>
         {txHash && (

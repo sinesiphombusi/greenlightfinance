@@ -40,12 +40,12 @@ const ConfirmStep = ({ mode, amount, onConfirm, onCancel, isProcessing = false }
           {isDeposit ? "You are depositing" : "You are withdrawing"}
         </div>
         <div className="font-display text-3xl font-bold text-foreground">
-          ${amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          {amount.toLocaleString("en-US", { minimumFractionDigits: 2 })} FLOW
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {isDeposit
-            ? "This amount will be added to your savings vault and begin growing steadily over time."
-            : "This amount will be moved out of your savings vault."}
+            ? "This amount will be stashed in your on-chain vault. Demo mode — no real tokens are transferred."
+            : "This amount will be unstashed from your vault. Demo mode — no real tokens are transferred."}
         </p>
       </div>
 

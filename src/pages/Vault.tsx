@@ -10,7 +10,7 @@ import ConfirmStep from "@/components/vault/ConfirmStep";
 import SuccessStep from "@/components/vault/SuccessStep";
 import { mockVaultData } from "@/lib/mock-data";
 import { useWallet } from "@/hooks/use-wallet";
-import { getVaultBalance, deposit as contractDeposit, withdraw as contractWithdraw } from "@/lib/vault";
+import { getVaultBalance, deposit as contractDeposit, withdraw as contractWithdraw, setupAccount } from "@/lib/vault";
 import { toast } from "sonner";
 import JourneySteps from "@/components/JourneySteps";
 
@@ -26,13 +26,22 @@ const Vault = () => {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Auto-setup vault on connect, then fetch balance
   useEffect(() => {
     if (!address) return;
-    getVaultBalance(address)
-      .then((bal) => setBalance(bal))
-      .catch((err) => {
+    (async () => {
+      try {
+        await setupAccount();
+      } catch (err) {
+        console.warn("Setup account skipped (may already exist):", err);
+      }
+      try {
+        const bal = await getVaultBalance(address);
+        setBalance(bal);
+      } catch (err) {
         console.warn("Failed to fetch on-chain balance, using mock:", err);
-      });
+      }
+    })();
   }, [address]);
 
   const parsedAmount = parseFloat(amount);
@@ -159,7 +168,7 @@ const Vault = () => {
           </div>
           <div>
             <span className="font-display text-4xl font-bold text-foreground">
-              ${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+              {balance.toLocaleString("en-US", { minimumFractionDigits: 2 })} FLOW
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -183,7 +192,7 @@ const Vault = () => {
               <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-md">
                 <ArrowDownToLine className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xs font-medium text-foreground">Deposit</span>
+              <span className="text-xs font-medium text-foreground">Stash</span>
             </button>
             <button
               onClick={() => startMode("withdraw")}
@@ -192,7 +201,7 @@ const Vault = () => {
               <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-md">
                 <ArrowUpFromLine className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xs font-medium text-foreground">Withdraw</span>
+              <span className="text-xs font-medium text-foreground">Unstash</span>
             </button>
           </div>
         )}
@@ -271,7 +280,7 @@ const Vault = () => {
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Info className="w-3 h-3" />
-              <span>No fees. Transaction is instant.</span>
+              <span>Demo mode — vault balance updates on-chain. No real tokens transferred.</span>
             </div>
           </motion.div>
         )}
