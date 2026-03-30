@@ -5,32 +5,32 @@ import { Badge } from "@/components/ui/badge";
 const steps = [
   {
     icon: UserPlus,
-    label: "Create account",
-    description: "Email sign-in, no seed phrase needed.",
+    label: "Wallet Onboard",
+    description: "Account abstraction, account linking — no seed phrase needed.",
     status: "active" as const,
   },
   {
     icon: Banknote,
-    label: "Add funds",
-    description: "Convert your money to savings-ready funds.",
+    label: "On-Ramp",
+    description: "Convert fiat to PYUSD0 or USDC seamlessly.",
     status: "coming" as const,
   },
   {
     icon: ArrowLeftRight,
-    label: "Prepare funds",
-    description: "Handled automatically behind the scenes.",
+    label: "Swap / Bridge",
+    description: "Route funds via swap.flow.com, LI.FI, or Stargate.",
     status: "coming" as const,
   },
   {
     icon: TrendingUp,
-    label: "Grow steadily",
-    description: "Your vault earns returns over time.",
+    label: "Earn Yield",
+    description: "Grow steadily through FCM, More Markets, and staking vaults.",
     status: "active" as const,
   },
   {
     icon: CircleDollarSign,
-    label: "Cash out",
-    description: "Move money back when you're ready.",
+    label: "Off-Ramp",
+    description: "Convert crypto back to fiat with a seamless exit.",
     status: "coming" as const,
   },
 ];
