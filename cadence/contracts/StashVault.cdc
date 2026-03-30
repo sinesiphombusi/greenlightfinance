@@ -1,8 +1,5 @@
-// StashVault.cdc — Savings vault resource stored in each user's account
-// Deploy to Flow Testnet, then update CONTRACT_ADDRESS in src/lib/vault.ts
-
-import FungibleToken from 0x9a0766d93b6608b7
-import FlowToken from 0x7e60df042a9c0868
+// StashVault.cdc — MVP savings vault (simulated deposits, real on-chain state)
+// In production, this would integrate with FungibleToken (FLOW/stablecoins).
 
 access(all) contract StashVault {
 
@@ -22,33 +19,30 @@ access(all) contract StashVault {
 
     // ── Vault resource — stored in each user's account ──
     access(all) resource Vault: VaultPublic {
-        access(self) var flowVault: @FlowToken.Vault
+        access(self) var balance: UFix64
 
         init() {
-            self.flowVault <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>()) as! @FlowToken.Vault
+            self.balance = 0.0
         }
 
         // Read balance
         access(all) fun getBalance(): UFix64 {
-            return self.flowVault.balance
+            return self.balance
         }
 
-        // Deposit FLOW into the stash
-        access(all) fun deposit(from: @{FungibleToken.Vault}) {
-            let amount = from.balance
-            self.flowVault.deposit(from: <-from)
+        // Simulate deposit (MVP: no real token transfer)
+        access(all) fun deposit(amount: UFix64) {
+            self.balance = self.balance + amount
             emit Deposited(amount: amount, to: self.owner?.address)
         }
 
-        // Withdraw FLOW from the stash
-        access(Owner) fun withdraw(amount: UFix64): @{FungibleToken.Vault} {
-            let vault <- self.flowVault.withdraw(amount: amount)
+        // Simulate withdraw (MVP: no real token transfer)
+        access(Owner) fun withdraw(amount: UFix64) {
+            pre {
+                self.balance >= amount: "Insufficient vault balance"
+            }
+            self.balance = self.balance - amount
             emit Withdrawn(amount: amount, from: self.owner?.address)
-            return <-vault
-        }
-
-        destroy() {
-            destroy self.flowVault
         }
     }
 
