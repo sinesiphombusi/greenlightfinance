@@ -6,6 +6,7 @@ fcl.config({
   "app.detail.title": "StashVault",
   "app.detail.icon": "https://greenlightfinance.lovable.app/favicon.ico",
   "flow.network": "testnet",
+  "walletconnect.projectId": "63b3eb4bf02924f2f68b8108b18d25c7",
 });
 
 export default fcl;
