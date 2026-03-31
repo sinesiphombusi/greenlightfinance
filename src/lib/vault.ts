@@ -4,6 +4,9 @@ import * as t from "@onflow/types";
 // ── Replace with your deployed contract address on Flow Testnet ──
 export const CONTRACT_ADDRESS = "0xSTASH_VAULT_ADDRESS";
 
+// Check if the contract address is a real deployed address
+export const IS_CONTRACT_DEPLOYED = !CONTRACT_ADDRESS.includes("STASH_VAULT_ADDRESS");
+
 // ── Cadence templates (simplified MVP: balance tracking, no token transfers) ──
 
 const SETUP_ACCOUNT_CDC = `
