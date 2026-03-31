@@ -10,14 +10,26 @@ import ConfirmStep from "@/components/vault/ConfirmStep";
 import SuccessStep from "@/components/vault/SuccessStep";
 import { mockVaultData } from "@/lib/mock-data";
 import { useWallet } from "@/hooks/use-wallet";
-import { getVaultBalance, deposit as contractDeposit, withdraw as contractWithdraw } from "@/lib/vault";
+import {
+  USE_CONTRACT,
+  getVaultBalance,
+  deposit as contractDeposit,
+  withdraw as contractWithdraw,
+} from "@/lib/vault";
 import { toast } from "sonner";
 import JourneySteps from "@/components/JourneySteps";
 
 type FlowStep = "idle" | "input" | "confirm" | "success";
 
 const Vault = () => {
-  const { address, isConnecting, isConnected, connect } = useWallet();
+  const {
+    address,
+    isConnecting,
+    isConnected,
+    isPreparingAccount,
+    isWalletReady,
+    connect,
+  } = useWallet();
   const [balance, setBalance] = useState(mockVaultData.balance);
   const [amount, setAmount] = useState("");
   const [mode, setMode] = useState<"deposit" | "withdraw" | null>(null);
@@ -27,19 +39,23 @@ const Vault = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (!address) return;
+    if (!address || !USE_CONTRACT || !isWalletReady) return;
     getVaultBalance(address)
       .then((bal) => setBalance(bal))
       .catch((err) => {
         console.warn("Failed to fetch on-chain balance, using mock:", err);
       });
-  }, [address]);
+  }, [address, isWalletReady]);
 
   const parsedAmount = parseFloat(amount);
   const isValidAmount = parsedAmount > 0;
 
   const handleProceedToConfirm = () => {
     if (!isValidAmount) return;
+    if (USE_CONTRACT && address && !isWalletReady) {
+      toast.error("Your vault is still being prepared. Please wait a moment.");
+      return;
+    }
     if (mode === "withdraw" && parsedAmount > balance) {
       toast.error("Not enough in your vault");
       return;
@@ -52,7 +68,7 @@ const Vault = () => {
     setIsProcessing(true);
     setTxHash(null);
     try {
-      if (address) {
+      if (address && USE_CONTRACT) {
         let hash: string;
         if (mode === "deposit") {
           hash = await contractDeposit(lastAmount);
@@ -219,6 +235,13 @@ const Vault = () => {
           </div>
         )}
 
+        {isConnected && isPreparingAccount && (
+          <div className="glass-card p-4 flex items-center gap-3 text-sm text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+            <span>Preparing your on-chain vault for first use...</span>
+          </div>
+        )}
+
         {/* Input step */}
         {step === "input" && mode && (
           <motion.div
@@ -265,8 +288,12 @@ const Vault = () => {
                   onKeyDown={(e) => e.key === "Enter" && handleProceedToConfirm()}
                 />
               </div>
-              <Button onClick={handleProceedToConfirm} disabled={!isValidAmount} className="rounded-xl h-12">
-                Continue
+              <Button
+                onClick={handleProceedToConfirm}
+                disabled={!isValidAmount || (USE_CONTRACT && !!address && !isWalletReady)}
+                className="rounded-xl h-12"
+              >
+                {USE_CONTRACT && !!address && !isWalletReady ? "Preparing..." : "Continue"}
               </Button>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
