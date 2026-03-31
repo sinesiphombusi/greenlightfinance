@@ -4,6 +4,9 @@ import * as t from "@onflow/types";
 // ── Replace with your deployed contract address on Flow Testnet ──
 export const CONTRACT_ADDRESS = "0xSTASH_VAULT_ADDRESS";
 
+// Check if the contract address is a real deployed address
+export const IS_CONTRACT_DEPLOYED = !CONTRACT_ADDRESS.includes("STASH_VAULT_ADDRESS");
+
 // ── Cadence templates (simplified MVP: balance tracking, no token transfers) ──
 
 const SETUP_ACCOUNT_CDC = `
@@ -65,6 +68,10 @@ access(all) fun main(address: Address): UFix64 {
  * Initialize the user's StashVault resource (run once per user after wallet connect).
  */
 export async function setupAccount(): Promise<string> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("StashVault contract not deployed — skipping setup (demo mode)");
+    return "demo_setup";
+  }
   const txId = await fcl.mutate({
     cadence: SETUP_ACCOUNT_CDC,
     proposer: fcl.authz,
@@ -81,6 +88,11 @@ export async function setupAccount(): Promise<string> {
  * Deposit (simulate) — updates on-chain vault balance.
  */
 export async function deposit(amount: number): Promise<string> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("Demo deposit:", amount);
+    await new Promise((r) => setTimeout(r, 800));
+    return `demo_deposit_${Date.now().toString(16)}`;
+  }
   const amountFixed = amount.toFixed(8);
   const txId = await fcl.mutate({
     cadence: DEPOSIT_CDC,
@@ -101,6 +113,11 @@ export async function deposit(amount: number): Promise<string> {
  * Withdraw (simulate) — updates on-chain vault balance.
  */
 export async function withdraw(amount: number): Promise<string> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("Demo withdraw:", amount);
+    await new Promise((r) => setTimeout(r, 800));
+    return `demo_withdraw_${Date.now().toString(16)}`;
+  }
   const amountFixed = amount.toFixed(8);
   const txId = await fcl.mutate({
     cadence: WITHDRAW_CDC,
@@ -121,6 +138,10 @@ export async function withdraw(amount: number): Promise<string> {
  * Get vault balance for an address.
  */
 export async function getVaultBalance(address: string): Promise<number> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("Demo mode — returning 0 for on-chain balance");
+    return 0;
+  }
   try {
     const balance = await fcl.query({
       cadence: GET_BALANCE_CDC,
