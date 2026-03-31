@@ -67,6 +67,7 @@ const Vault = () => {
     setTxHash(null);
     try {
       if (address) {
+        // On-chain mode
         let hash: string;
         if (mode === "deposit") {
           hash = await contractDeposit(lastAmount);
@@ -77,6 +78,10 @@ const Vault = () => {
         const newBal = await getVaultBalance(address);
         setBalance(newBal);
       } else {
+        // Demo mode — simulate a brief processing delay
+        await new Promise((r) => setTimeout(r, 1200));
+        const demoHash = `demo_${Date.now().toString(16)}`;
+        setTxHash(demoHash);
         if (mode === "deposit") {
           setBalance((b) => b + lastAmount);
         } else {
