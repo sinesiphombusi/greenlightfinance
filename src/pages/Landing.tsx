@@ -128,7 +128,7 @@ const Landing = () => {
       </section>
 
       {/* Journey */}
-      <section className="relative z-10 px-5 pb-16">
+      <section id="journey" className="relative z-10 px-5 pb-16 scroll-mt-8">
         <div className="max-w-lg mx-auto space-y-5">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
