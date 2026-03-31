@@ -1,7 +1,7 @@
 // Withdraw FLOW from the user's StashVault back to their wallet
 import FungibleToken from 0x9a0766d93b6608b7
 import FlowToken from 0x7e60df042a9c0868
-import StashVault from 0xSTASH_VAULT_ADDRESS
+import StashVault from 0x5bb6780edb394fdb
 
 transaction(amount: UFix64) {
     prepare(signer: auth(BorrowValue) &Account) {

@@ -1,5 +1,5 @@
 // Read a user's StashVault balance
-import StashVault from 0xSTASH_VAULT_ADDRESS
+import StashVault from 0x5bb6780edb394fdb
 
 access(all) fun main(address: Address): UFix64 {
     let account = getAccount(address)

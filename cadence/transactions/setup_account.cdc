@@ -1,5 +1,5 @@
 // Run ONCE per user after wallet connect to initialize their StashVault
-import StashVault from 0xSTASH_VAULT_ADDRESS
+import StashVault from 0x5bb6780edb394fdb
 
 transaction {
     prepare(signer: auth(SaveValue, Capabilities) &Account) {
