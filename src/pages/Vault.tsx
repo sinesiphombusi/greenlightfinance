@@ -26,9 +26,14 @@ const Vault = () => {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Auto-setup vault on connect, then fetch balance
+  // Reset to mock data when wallet disconnects
   useEffect(() => {
-    if (!address) return;
+    if (!address) {
+      setBalance(mockVaultData.balance);
+      resetFlow();
+      return;
+    }
+    // Auto-setup vault on connect, then fetch balance
     (async () => {
       try {
         await setupAccount();
@@ -37,7 +42,7 @@ const Vault = () => {
       }
       try {
         const bal = await getVaultBalance(address);
-        setBalance(bal);
+        if (bal > 0) setBalance(bal);
       } catch (err) {
         console.warn("Failed to fetch on-chain balance, using mock:", err);
       }
@@ -62,6 +67,7 @@ const Vault = () => {
     setTxHash(null);
     try {
       if (address) {
+        // On-chain mode
         let hash: string;
         if (mode === "deposit") {
           hash = await contractDeposit(lastAmount);
@@ -72,6 +78,10 @@ const Vault = () => {
         const newBal = await getVaultBalance(address);
         setBalance(newBal);
       } else {
+        // Demo mode — simulate a brief processing delay
+        await new Promise((r) => setTimeout(r, 1200));
+        const demoHash = `demo_${Date.now().toString(16)}`;
+        setTxHash(demoHash);
         if (mode === "deposit") {
           setBalance((b) => b + lastAmount);
         } else {
