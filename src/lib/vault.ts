@@ -138,6 +138,10 @@ export async function withdraw(amount: number): Promise<string> {
  * Get vault balance for an address.
  */
 export async function getVaultBalance(address: string): Promise<number> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("Demo mode — returning 0 for on-chain balance");
+    return 0;
+  }
   try {
     const balance = await fcl.query({
       cadence: GET_BALANCE_CDC,
