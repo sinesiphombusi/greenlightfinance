@@ -113,6 +113,11 @@ export async function deposit(amount: number): Promise<string> {
  * Withdraw (simulate) — updates on-chain vault balance.
  */
 export async function withdraw(amount: number): Promise<string> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("Demo withdraw:", amount);
+    await new Promise((r) => setTimeout(r, 800));
+    return `demo_withdraw_${Date.now().toString(16)}`;
+  }
   const amountFixed = amount.toFixed(8);
   const txId = await fcl.mutate({
     cadence: WITHDRAW_CDC,
