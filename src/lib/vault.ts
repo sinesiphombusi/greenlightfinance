@@ -68,6 +68,10 @@ access(all) fun main(address: Address): UFix64 {
  * Initialize the user's StashVault resource (run once per user after wallet connect).
  */
 export async function setupAccount(): Promise<string> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("StashVault contract not deployed — skipping setup (demo mode)");
+    return "demo_setup";
+  }
   const txId = await fcl.mutate({
     cadence: SETUP_ACCOUNT_CDC,
     proposer: fcl.authz,
