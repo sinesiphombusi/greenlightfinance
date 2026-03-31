@@ -56,15 +56,21 @@ const SuccessStep = ({ mode, amount, newBalance, onBackToVault, txHash }: Succes
         {txHash && (
           <div className="border-t border-border/40 pt-3 mt-3">
             <div className="text-sm text-vault-foreground/70">Transaction</div>
-            <a
-              href={`${FLOW_TESTNET_EXPLORER}/tx/${txHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline break-all"
-            >
-              {txHash.slice(0, 10)}…{txHash.slice(-8)}
-              <ExternalLink className="w-3 h-3 shrink-0" />
-            </a>
+            {txHash.startsWith("demo_") ? (
+              <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                Demo tx: {txHash.slice(5, 15)}…
+              </span>
+            ) : (
+              <a
+                href={`${FLOW_TESTNET_EXPLORER}/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline break-all"
+              >
+                {txHash.slice(0, 10)}…{txHash.slice(-8)}
+                <ExternalLink className="w-3 h-3 shrink-0" />
+              </a>
+            )}
           </div>
         )}
       </div>
