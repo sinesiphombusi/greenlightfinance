@@ -88,6 +88,11 @@ export async function setupAccount(): Promise<string> {
  * Deposit (simulate) — updates on-chain vault balance.
  */
 export async function deposit(amount: number): Promise<string> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("Demo deposit:", amount);
+    await new Promise((r) => setTimeout(r, 800));
+    return `demo_deposit_${Date.now().toString(16)}`;
+  }
   const amountFixed = amount.toFixed(8);
   const txId = await fcl.mutate({
     cadence: DEPOSIT_CDC,
