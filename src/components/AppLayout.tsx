@@ -1,8 +1,11 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Wallet, Zap, Clock, LogOut } from "lucide-react";
+import { Wallet, Zap, Clock, LogOut, Unplug } from "lucide-react";
 import { motion } from "framer-motion";
 import StashVaultLogo from "@/components/StashVaultLogo";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useWallet } from "@/hooks/use-wallet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { to: "/vault", label: "Vault", icon: Wallet },
@@ -12,6 +15,7 @@ const navItems = [
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const { address, isConnected, disconnect } = useWallet();
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -27,6 +31,30 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           </NavLink>
           <div className="flex items-center gap-1">
             <ThemeToggle />
+            {isConnected && address && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="text-muted-foreground hover:text-foreground transition-colors p-2" aria-label="Wallet options">
+                    <Wallet className="w-4 h-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-56 p-3 space-y-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="w-2 h-2 rounded-full bg-success shrink-0" />
+                    <span className="truncate">{address}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start gap-2"
+                    onClick={disconnect}
+                  >
+                    <Unplug className="w-3.5 h-3.5" />
+                    Disconnect Wallet
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            )}
             <NavLink
               to="/"
               className="text-muted-foreground hover:text-foreground transition-colors p-2"

@@ -88,9 +88,9 @@ const Landing = () => {
             </Button>
           </Link>
 
-          <button className="text-sm text-white font-medium hover:underline">
+          <a href="#journey" className="text-sm text-white font-medium hover:underline">
             Learn how it works
-          </button>
+          </a>
 
           {/* Trust points */}
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-2">
@@ -128,7 +128,7 @@ const Landing = () => {
       </section>
 
       {/* Journey */}
-      <section className="relative z-10 px-5 pb-16">
+      <section id="journey" className="relative z-10 px-5 pb-16 scroll-mt-8">
         <div className="max-w-lg mx-auto space-y-5">
           <motion.div
             initial={{ opacity: 0, y: 12 }}

@@ -3,12 +3,10 @@ import StashVault from 0x5bb6780edb394fdb
 
 transaction {
     prepare(signer: auth(SaveValue, Capabilities) &Account) {
-        // Only create if vault doesn't exist yet
         if signer.storage.borrow<&StashVault.Vault>(from: StashVault.VaultStoragePath) == nil {
             let vault <- StashVault.createVault()
             signer.storage.save(<-vault, to: StashVault.VaultStoragePath)
-            
-            // Create public capability for balance reads
+
             signer.capabilities.publish(
                 signer.capabilities.storage.issue<&{StashVault.VaultPublic}>(StashVault.VaultStoragePath),
                 at: StashVault.VaultPublicPath

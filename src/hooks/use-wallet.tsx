@@ -81,9 +81,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const disconnect = useCallback(() => {
-    fcl.unauthenticate();
+    try {
+      fcl.unauthenticate();
+    } catch (err) {
+      console.warn("FCL unauthenticate error:", err);
+    }
     setAddress(null);
     setIsPreparingAccount(false);
+    hasSetup.current = false;
   }, []);
 
   return (

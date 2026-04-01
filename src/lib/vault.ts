@@ -4,8 +4,10 @@ import * as t from "@onflow/types";
 // ── Replace with your deployed contract address on Flow Testnet ──
 export const CONTRACT_ADDRESS = "0x5bb6780edb394fdb";
 
-// ── Cadence transaction templates ──
-// These embed the contract address at build time.
+// Check if the contract address is a real deployed address
+export const IS_CONTRACT_DEPLOYED = !CONTRACT_ADDRESS.includes("STASH_VAULT_ADDRESS");
+
+// ── Cadence templates (simplified MVP: balance tracking, no token transfers) ──
 
 const SETUP_ACCOUNT_CDC = `
 import StashVault from ${CONTRACT_ADDRESS}
@@ -25,30 +27,19 @@ transaction {
 `;
 
 const DEPOSIT_CDC = `
-import FungibleToken from 0x9a0766d93b6608b7
-import FlowToken from 0x7e60df042a9c0868
 import StashVault from ${CONTRACT_ADDRESS}
 
 transaction(amount: UFix64) {
   prepare(signer: auth(BorrowValue) &Account) {
-    let flowVaultRef = signer.storage.borrow<auth(FungibleToken.Withdraw) &FlowToken.Vault>(
-      from: /storage/flowTokenVault
-    ) ?? panic("Could not borrow FLOW vault")
-
-    let deposit <- flowVaultRef.withdraw(amount: amount)
-
     let stashRef = signer.storage.borrow<&StashVault.Vault>(
       from: StashVault.VaultStoragePath
     ) ?? panic("StashVault not found — run setup first")
-
-    stashRef.deposit(from: <-deposit)
+    stashRef.deposit(amount: amount)
   }
 }
 `;
 
 const WITHDRAW_CDC = `
-import FungibleToken from 0x9a0766d93b6608b7
-import FlowToken from 0x7e60df042a9c0868
 import StashVault from ${CONTRACT_ADDRESS}
 
 transaction(amount: UFix64) {
@@ -56,14 +47,7 @@ transaction(amount: UFix64) {
     let stashRef = signer.storage.borrow<auth(StashVault.Vault.Owner) &StashVault.Vault>(
       from: StashVault.VaultStoragePath
     ) ?? panic("StashVault not found")
-
-    let withdrawn <- stashRef.withdraw(amount: amount)
-
-    let flowVaultRef = signer.storage.borrow<&FlowToken.Vault>(
-      from: /storage/flowTokenVault
-    ) ?? panic("Could not borrow FLOW vault")
-
-    flowVaultRef.deposit(from: <-withdrawn)
+    stashRef.withdraw(amount: amount)
   }
 }
 `;
@@ -102,9 +86,12 @@ function assertSealedSuccess(txId: string, txStatus: FlowTxStatus) {
 
 /**
  * Initialize the user's StashVault resource (run once per user after wallet connect).
- * Only needed when USE_CONTRACT = true.
  */
 export async function setupAccount(): Promise<string> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("StashVault contract not deployed — skipping setup (demo mode)");
+    return "demo_setup";
+  }
   const txId = await fcl.mutate({
     cadence: SETUP_ACCOUNT_CDC,
     proposer: fcl.authz,
@@ -119,9 +106,14 @@ export async function setupAccount(): Promise<string> {
 }
 
 /**
- * Deposit FLOW into the vault.
+ * Deposit (simulate) — updates on-chain vault balance.
  */
 export async function deposit(amount: number): Promise<string> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("Demo deposit:", amount);
+    await new Promise((r) => setTimeout(r, 800));
+    return `demo_deposit_${Date.now().toString(16)}`;
+  }
   const amountFixed = amount.toFixed(8);
   const txId = await fcl.mutate({
     cadence: DEPOSIT_CDC,
@@ -136,14 +128,20 @@ export async function deposit(amount: number): Promise<string> {
 
   const txStatus = await fcl.tx(txId).onceSealed() as FlowTxStatus;
   assertSealedSuccess(txId, txStatus);
+  const txStatus = await fcl.tx(txId).onceSealed();
   console.log("Deposit sealed:", txStatus);
   return txId;
 }
 
 /**
- * Withdraw FLOW from the vault.
+ * Withdraw (simulate) — updates on-chain vault balance.
  */
 export async function withdraw(amount: number): Promise<string> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("Demo withdraw:", amount);
+    await new Promise((r) => setTimeout(r, 800));
+    return `demo_withdraw_${Date.now().toString(16)}`;
+  }
   const amountFixed = amount.toFixed(8);
   const txId = await fcl.mutate({
     cadence: WITHDRAW_CDC,
@@ -158,6 +156,7 @@ export async function withdraw(amount: number): Promise<string> {
 
   const txStatus = await fcl.tx(txId).onceSealed() as FlowTxStatus;
   assertSealedSuccess(txId, txStatus);
+  const txStatus = await fcl.tx(txId).onceSealed();
   console.log("Withdraw sealed:", txStatus);
   return txId;
 }
@@ -166,6 +165,10 @@ export async function withdraw(amount: number): Promise<string> {
  * Get vault balance for an address.
  */
 export async function getVaultBalance(address: string): Promise<number> {
+  if (!IS_CONTRACT_DEPLOYED) {
+    console.log("Demo mode — returning 0 for on-chain balance");
+    return 0;
+  }
   try {
     const balance = await fcl.query({
       cadence: GET_BALANCE_CDC,

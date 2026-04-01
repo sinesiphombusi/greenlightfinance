@@ -96,7 +96,10 @@ const Onboarding = () => {
                   <ArrowRight className="w-4 h-4" />
                 </Button>
 
-                <button className="w-full text-sm text-primary font-medium hover:underline text-center">
+                <button
+                  onClick={() => setCurrentStep(1)}
+                  className="w-full text-sm text-primary font-medium hover:underline text-center"
+                >
                   Learn how it works
                 </button>
 

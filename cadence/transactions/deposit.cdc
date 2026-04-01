@@ -5,19 +5,10 @@ import StashVault from 0x5bb6780edb394fdb
 
 transaction(amount: UFix64) {
     prepare(signer: auth(BorrowValue) &Account) {
-        // Borrow user's FLOW token vault
-        let flowVaultRef = signer.storage.borrow<auth(FungibleToken.Withdraw) &FlowToken.Vault>(
-            from: /storage/flowTokenVault
-        ) ?? panic("Could not borrow FLOW vault")
-
-        // Withdraw FLOW
-        let deposit <- flowVaultRef.withdraw(amount: amount)
-
-        // Borrow user's StashVault and deposit
         let stashRef = signer.storage.borrow<&StashVault.Vault>(
             from: StashVault.VaultStoragePath
         ) ?? panic("StashVault not found — run setup_account first")
 
-        stashRef.deposit(from: <-deposit)
+        stashRef.deposit(amount: amount)
     }
 }
