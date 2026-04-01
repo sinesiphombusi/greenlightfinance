@@ -11,6 +11,8 @@ interface WalletContextType {
   address: string | null;
   isConnecting: boolean;
   isConnected: boolean;
+  isPreparingAccount: boolean;
+  isWalletReady: boolean;
   connect: () => Promise<void>;
   disconnect: () => void;
 }
@@ -19,6 +21,8 @@ const WalletContext = createContext<WalletContextType>({
   address: null,
   isConnecting: false,
   isConnected: false,
+  isPreparingAccount: false,
+  isWalletReady: false,
   connect: async () => {},
   disconnect: () => {},
 });
@@ -28,29 +32,35 @@ export const useWallet = () => useContext(WalletContext);
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [address, setAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isPreparingAccount, setIsPreparingAccount] = useState(false);
 
   const hasSetup = useRef(false);
 
-  // Subscribe to FCL current user on mount
   useEffect(() => {
     const unsubscribe = fcl.currentUser.subscribe(async (user: FlowUser) => {
       if (user?.loggedIn && user?.addr) {
         setAddress(user.addr);
-        // Auto-initialize StashVault for first-time users
+
         if (!hasSetup.current) {
           hasSetup.current = true;
+          setIsPreparingAccount(true);
+
           try {
             await setupAccount();
             console.log("StashVault setup complete for", user.addr);
           } catch (err) {
-            // Setup may fail if contract not deployed yet — that's OK in demo mode
-            console.warn("StashVault setup skipped (contract may not be deployed):", err);
+            hasSetup.current = false;
+            console.warn("StashVault setup failed:", err);
+          } finally {
+            setIsPreparingAccount(false);
           }
         }
       } else {
         setAddress(null);
         hasSetup.current = false;
+        setIsPreparingAccount(false);
       }
+
       setIsConnecting(false);
     });
 
@@ -77,6 +87,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       console.warn("FCL unauthenticate error:", err);
     }
     setAddress(null);
+    setIsPreparingAccount(false);
     hasSetup.current = false;
   }, []);
 
@@ -86,6 +97,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         address,
         isConnecting,
         isConnected: !!address,
+        isPreparingAccount,
+        isWalletReady: !!address && !isPreparingAccount,
         connect,
         disconnect,
       }}

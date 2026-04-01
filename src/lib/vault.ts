@@ -2,7 +2,7 @@ import fcl from "@/lib/flow/config";
 import * as t from "@onflow/types";
 
 // ── Replace with your deployed contract address on Flow Testnet ──
-export const CONTRACT_ADDRESS = "0xSTASH_VAULT_ADDRESS";
+export const CONTRACT_ADDRESS = "0x5bb6780edb394fdb";
 
 // Check if the contract address is a real deployed address
 export const IS_CONTRACT_DEPLOYED = !CONTRACT_ADDRESS.includes("STASH_VAULT_ADDRESS");
@@ -64,6 +64,26 @@ access(all) fun main(address: Address): UFix64 {
 }
 `;
 
+// ── Fallback: native FLOW transfer (works without deployed contract) ──
+
+// Set to true once you deploy StashVault.cdc and update CONTRACT_ADDRESS
+export const USE_CONTRACT = true;
+
+interface FlowTxStatus {
+  errorMessage?: string;
+  statusCode?: number;
+}
+
+function assertSealedSuccess(txId: string, txStatus: FlowTxStatus) {
+  if (txStatus.errorMessage) {
+    throw new Error(txStatus.errorMessage);
+  }
+
+  if (typeof txStatus.statusCode === "number" && txStatus.statusCode !== 4) {
+    throw new Error(`Transaction ${txId} failed with status ${txStatus.statusCode}.`);
+  }
+}
+
 /**
  * Initialize the user's StashVault resource (run once per user after wallet connect).
  */
@@ -79,7 +99,8 @@ export async function setupAccount(): Promise<string> {
     authorizations: [fcl.authz],
     limit: 999,
   });
-  await fcl.tx(txId).onceSealed();
+  const txStatus = await fcl.tx(txId).onceSealed() as FlowTxStatus;
+  assertSealedSuccess(txId, txStatus);
   console.log("StashVault setup complete:", txId);
   return txId;
 }
@@ -104,6 +125,9 @@ export async function deposit(amount: number): Promise<string> {
     authorizations: [fcl.authz],
     limit: 999,
   });
+
+  const txStatus = await fcl.tx(txId).onceSealed() as FlowTxStatus;
+  assertSealedSuccess(txId, txStatus);
   const txStatus = await fcl.tx(txId).onceSealed();
   console.log("Deposit sealed:", txStatus);
   return txId;
@@ -129,6 +153,9 @@ export async function withdraw(amount: number): Promise<string> {
     authorizations: [fcl.authz],
     limit: 999,
   });
+
+  const txStatus = await fcl.tx(txId).onceSealed() as FlowTxStatus;
+  assertSealedSuccess(txId, txStatus);
   const txStatus = await fcl.tx(txId).onceSealed();
   console.log("Withdraw sealed:", txStatus);
   return txId;

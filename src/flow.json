@@ -1,0 +1,21 @@
+{
+    "contracts": {
+        "StashVault": "./cadence/contracts/StashVault.cdc"
+    },
+    "networks": {
+        "testnet": "access.devnet.nodes.onflow.org:9000"
+    },
+    "accounts": {
+        "testnet-account": {
+            "address": "0x5bb6780edb394fdb",
+            "key": "88fa515e896669216b1e89a2c1934e2e82af0f4c2c86b30f748edc11ad538270"
+        }
+    },
+    "deployments": {
+        "testnet": {
+            "testnet-account": [
+                "StashVault"
+            ]
+        }
+    }
+}

@@ -1,93 +1,122 @@
-# Greenlight Finance — StashVault
+# Greenlight Finance - StashVault
 
-StashVault is a consumer-first onchain savings product built on Flow, designed to make decentralized finance feel like modern personal finance.
+StashVault is a consumer savings product built on Flow. It is designed to make onchain saving feel closer to modern personal finance than a typical DeFi app.
 
-It lets everyday people safely stash money, earn yield, and automate savings without wallets, gas fees, or DeFi jargon.
+The current implementation uses:
+- React + Vite + TypeScript for the frontend
+- Flow Client Library (FCL) for wallet authentication and transaction signing
+- Cadence for the onchain vault contract and transactions
+- Flow testnet for contract execution
 
-StashVault is the first product by Greenlight Finance, a platform focused on empowering everyday users with calm, trustworthy financial tools powered by decentralized infrastructure.
+## What The App Does
+
+StashVault lets a user:
+- connect a Flow-compatible wallet through FCL
+- initialize a personal vault resource in their account
+- deposit FLOW into that vault
+- withdraw FLOW from that vault
+- read their vault balance onchain
+
+Each user owns their vault resource directly in their account. The UI keeps the interaction simple, while the vault logic is enforced onchain in Cadence.
+
+## Current Architecture
+
+This repo is Cadence-based, not Flow EVM-based.
+
+Concretely:
+- the contract lives in [cadence/contracts/StashVault.cdc](./cadence/contracts/StashVault.cdc)
+- the frontend transaction helpers live in [src/lib/vault.ts](./src/lib/vault.ts)
+- FCL network and wallet config live in [src/lib/flow/config.ts](./src/lib/flow/config.ts)
+- wallet state is managed in [src/hooks/use-wallet.tsx](./src/hooks/use-wallet.tsx)
+
+The frontend currently targets the deployed `StashVault` contract at:
+- `0x5bb6780edb394fdb`
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ or Bun
-- A browser wallet (MetaMask or compatible) configured for Flow EVM Testnet
+- a Flow-compatible wallet that works with FCL on testnet
 
-### Install & Run
+### Install
 
 ```bash
-# Install dependencies
 npm install
+```
 
-# Start dev server
+### Run Locally
+
+```bash
 npm run dev
 ```
 
-### Flow EVM Testnet Configuration
+### Testnet Configuration
 
-The app connects to **Flow EVM Testnet** (Chain ID: 545).
+The app is configured for Flow testnet through FCL.
 
-Network details (auto-added to your wallet on connect):
-- **RPC URL:** `https://testnet.evm.nodes.onflow.org`
-- **Chain ID:** `545`
-- **Block Explorer:** `https://evm-testnet.flowscan.io`
-- **Currency:** FLOW
+Current config:
+- Access node: `https://rest-testnet.onflow.org`
+- Discovery wallet: `https://fcl-discovery.onflow.org/testnet/authn`
+- Network: `testnet`
 
-### Contract Setup
+See [src/lib/flow/config.ts](./src/lib/flow/config.ts).
 
-1. Deploy your StashVault contract to Flow EVM Testnet.
-2. Update `src/lib/config.ts` with:
-   - `VAULT_CONTRACT_ADDRESS` — your deployed contract address
-   - `VAULT_ABI` — your contract's ABI (deposit, withdraw, getBalance)
+## Contract Flow
 
-The default ABI expects:
-```solidity
-function deposit() payable
-function withdraw(uint256 amount)
-function getBalance(address user) view returns (uint256)
-```
+The onchain flow is:
 
-### Demo Mode
+1. A user connects a wallet through FCL.
+2. On first use, the app calls `setupAccount()` to create the user's `StashVault` resource if it does not already exist.
+3. Deposits call the Cadence transaction that withdraws FLOW from the user's Flow token vault and deposits it into `StashVault`.
+4. Withdrawals call the Cadence transaction that withdraws FLOW from `StashVault` back into the user's Flow token vault.
+5. Balance reads query the user's public vault capability onchain.
 
-If no wallet is detected or connected, the app runs in **demo mode** with mock data. All UI flows (deposit, withdraw, confirm, success) work without a wallet.
+Relevant files:
+- [cadence/transactions/setup_account.cdc](./cadence/transactions/setup_account.cdc)
+- [cadence/transactions/deposit.cdc](./cadence/transactions/deposit.cdc)
+- [cadence/transactions/withdraw.cdc](./cadence/transactions/withdraw.cdc)
+- [cadence/scripts/get_balance.cdc](./cadence/scripts/get_balance.cdc)
 
-## Architecture
+## Demo Mode vs Onchain Mode
 
-- **Frontend:** React + Vite + Tailwind CSS + TypeScript
-- **Blockchain:** Flow EVM Testnet
-- **Contract Interaction:** ethers.js v6
-- **Wallet:** MetaMask or any injected EVM wallet
+The app was originally structured to support a local demo mode, but the current frontend is wired to the deployed Cadence contract and real onchain transactions.
 
-## Core Features
-
-1. **Walletless onboarding** — Users can explore the app in demo mode without a wallet
-2. **Gasless experience** — Transactions are sponsored (no gas fees shown to users)
-3. **Savings Vault** — Deposit, earn yield, withdraw anytime
-4. **Embedded education** — Contextual explanations before every action
-5. **Auto-Stash** — Weekly automated deposit scheduling
-6. **Activity log** — Timestamped transaction history
+If a wallet is connected:
+- account setup runs onchain
+- deposits and withdrawals are submitted onchain
+- balances are queried onchain
 
 ## Project Structure
 
-```
+```text
 src/
-├── lib/
-│   ├── config.ts        # Contract address, ABI, network config
-│   ├── vault.ts         # Wallet connect + contract interaction functions
-│   └── mock-data.ts     # Demo mode mock data
-├── hooks/
-│   └── use-wallet.tsx   # React wallet context provider
-├── pages/
-│   ├── Vault.tsx        # Main vault screen
-│   ├── Autopilot.tsx    # Auto-stash settings
-│   └── ActivityPage.tsx # Transaction history
-└── components/
-    └── vault/
-        ├── ConfirmStep.tsx
-        ├── SuccessStep.tsx
-        └── VaultEducationBlocks.tsx
+  components/
+  hooks/
+    use-wallet.tsx
+  lib/
+    flow/
+      config.ts
+    mock-data.ts
+    vault.ts
+  pages/
+    Vault.tsx
+
+cadence/
+  contracts/
+    StashVault.cdc
+  transactions/
+    setup_account.cdc
+    deposit.cdc
+    withdraw.cdc
+  scripts/
+    get_balance.cdc
 ```
+
+## Important Note
+
+There is a `src/flow.json` file in the repo that includes deployment data. If it contains a live private key, that key should be rotated and removed from version control. Deployment credentials should not live in the repo.
 
 ## Team
 
-Built solo by Sinesipho Mbusi — Product Designer and DeFi-focused builder.
+Built by Sinesipho Mbusi under Greenlight Finance.
